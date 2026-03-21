@@ -1,6 +1,7 @@
 import asyncio
 import json
 import logging
+import os
 import uuid
 from contextlib import asynccontextmanager
 from typing import Any
@@ -58,7 +59,8 @@ class ApproveResponse(BaseModel):
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    async with create_workflow(db_path="checkpoints.db") as graph:
+    db_path = os.getenv("CHECKPOINT_DB_PATH", "checkpoints.db")
+    async with create_workflow(db_path=db_path) as graph:
         app.state.graph = graph
         logger.info("LangGraph workflow initialized")
         yield
@@ -70,7 +72,9 @@ app = FastAPI(title="Auto-Scholar API", lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "http://127.0.0.1:3000"],
+    allow_origins=os.getenv(
+        "CORS_ORIGINS", "http://localhost:3000,http://127.0.0.1:3000,http://localhost"
+    ).split(","),
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

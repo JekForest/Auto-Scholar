@@ -5,17 +5,19 @@ FROM ghcr.io/astral-sh/uv:python3.11-bookworm-slim
 
 WORKDIR /app
 
-# Install system dependencies for python-docx and aiohttp
+# Install system dependencies: gcc for C extensions, curl for healthcheck
 RUN apt-get update && apt-get install -y --no-install-recommends \
     gcc \
+    curl \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy metadata and lockfile first for better caching
 COPY pyproject.toml uv.lock ./
 RUN uv sync --frozen --no-dev --no-install-project
 
-# Copy application code
+# Copy application code and config
 COPY backend/ ./backend/
+COPY config/ ./config/
 RUN uv sync --frozen --no-dev
 
 # Create non-root user for security (principle of least privilege)
@@ -28,6 +30,7 @@ RUN mkdir -p /data && chown appuser:appuser /data
 # Environment variables (can be overridden)
 ENV LLM_BASE_URL=https://api.openai.com/v1
 ENV LLM_MODEL=gpt-4o
+ENV CHECKPOINT_DB_PATH=/data/checkpoints.db
 
 # Switch to non-root user
 USER appuser

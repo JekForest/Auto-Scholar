@@ -1,6 +1,6 @@
 import type { StartRequest, StartResponse, ApproveRequest, ApproveResponse, StatusResponse, DraftOutput, Paper, SessionSummary, SessionDetail, PaperSource, ContinueRequest, ContinueResponse, ModelConfig } from "@/types"
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"
+const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000"
 
 const ERROR_MESSAGES: Record<number, string> = {
   504: "研究超时，请缩小搜索范围后重试",
