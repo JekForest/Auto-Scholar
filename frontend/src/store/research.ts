@@ -85,6 +85,7 @@ interface ResearchState {
   
   setIsRegenerating: (regenerating: boolean) => void
   setTotalCostUsd: (cost: number) => void
+  hydrateFromStorage: () => void
   
   reset: () => void
 }
@@ -109,6 +110,7 @@ interface PersistedState {
 }
 
 function persistState(state: ResearchState): void {
+  if (typeof window === "undefined") return
   try {
     const data: PersistedState = {
       threadId: state.threadId,
@@ -136,6 +138,7 @@ function restoreState() {
   type RestorableFields = Pick<ResearchState, 'threadId' | 'status' | 'candidatePapers' | 'selectedPaperIds' | 'approvedPapers' | 'draft' | 'editedDraft' | 'isEditing' | 'error' | 'outputLanguage' | 'searchSources' | 'messages' | 'logs' | 'isRegenerating'>
 
   try {
+    if (typeof window === "undefined") return null
     const raw = sessionStorage.getItem(SESSION_STORAGE_KEY)
     sessionStorage.removeItem(SESSION_STORAGE_KEY)
     if (!raw) return null
@@ -162,8 +165,6 @@ function restoreState() {
   }
 }
 
-const restoredState = typeof window !== "undefined" ? restoreState() : null
-
 const initialState = {
   threadId: null,
   status: "idle" as WorkflowStatus,
@@ -179,7 +180,7 @@ const initialState = {
   searchSources: ["semantic_scholar", "arxiv", "pubmed"] as PaperSource[],
   messages: [] as ConversationMessage[],
   availableModels: [] as ModelConfig[],
-  selectedModelId: (typeof window !== "undefined" ? localStorage.getItem("auto-scholar-model") : null) as string | null,
+  selectedModelId: null as string | null,
   processingStage: null as ProcessingStage | null,
   paperProcessingStates: new Map<string, PaperProcessingState>(),
   processingStartTime: null as number | null,
@@ -187,10 +188,8 @@ const initialState = {
   totalCostUsd: 0,
 }
 
-const hydratedState = restoredState ? { ...initialState, ...restoredState } : initialState
-
 export const useResearchStore = create<ResearchState>((set, get) => ({
-  ...hydratedState,
+  ...initialState,
 
   setThreadId: (id) => set({ threadId: id }),
 
@@ -275,10 +274,12 @@ export const useResearchStore = create<ResearchState>((set, get) => ({
   setAvailableModels: (models) => set({ availableModels: models }),
 
   setSelectedModelId: (modelId) => {
-    if (modelId) {
-      localStorage.setItem("auto-scholar-model", modelId)
-    } else {
-      localStorage.removeItem("auto-scholar-model")
+    if (typeof window !== "undefined") {
+      if (modelId) {
+        localStorage.setItem("auto-scholar-model", modelId)
+      } else {
+        localStorage.removeItem("auto-scholar-model")
+      }
     }
     set({ selectedModelId: modelId })
   },
@@ -354,6 +355,18 @@ export const useResearchStore = create<ResearchState>((set, get) => ({
   setIsRegenerating: (regenerating: boolean) => set({ isRegenerating: regenerating }),
 
   setTotalCostUsd: (cost) => set({ totalCostUsd: cost }),
+
+  hydrateFromStorage: () => {
+    const restored = restoreState()
+    const selectedModelId =
+      typeof window !== "undefined" ? localStorage.getItem("auto-scholar-model") : null
+
+    set((state) => ({
+      ...state,
+      ...(restored ?? {}),
+      selectedModelId,
+    }))
+  },
 
   reset: () => set(initialState),
 }))

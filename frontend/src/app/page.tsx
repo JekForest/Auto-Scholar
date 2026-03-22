@@ -38,8 +38,13 @@ export default function Home() {
   const isRegenerating = useResearchStore((s) => s.isRegenerating)
   const setIsRegenerating = useResearchStore((s) => s.setIsRegenerating)
   const setTotalCostUsd = useResearchStore((s) => s.setTotalCostUsd)
+  const hydrateFromStorage = useResearchStore((s) => s.hydrateFromStorage)
 
   const prevOutputLanguageRef = useRef(outputLanguage)
+
+  useEffect(() => {
+    hydrateFromStorage()
+  }, [hydrateFromStorage])
 
   useEffect(() => {
     const cleanup = sseCleanupRef.current
