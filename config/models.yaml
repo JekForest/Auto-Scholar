@@ -20,7 +20,7 @@ models:
     is_local: false
     max_context_tokens: 128000
     supports_long_context: true
-    cost_tier: 3          # HIGH
+    cost_tier: 3 # HIGH
     reasoning_score: 8
     creativity_score: 8
     latency_score: 6
@@ -37,10 +37,27 @@ models:
     is_local: false
     max_context_tokens: 128000
     supports_long_context: true
-    cost_tier: 1          # LOW
+    cost_tier: 1 # LOW
     reasoning_score: 6
     creativity_score: 5
     latency_score: 9
+
+  - id: "openai:MiniMax-M2.5"
+    provider: "openai"
+    model_name: "MiniMax-M2.5"
+    display_name: "MiniMax M2.5"
+    api_base: "${LLM_BASE_URL:-https://api.scnet.cn/api/llm/v1}"
+    api_key_env: "LLM_API_KEY"
+    supports_json_mode: true
+    supports_structured_output: true
+    max_output_tokens: 8192
+    is_local: false
+    max_context_tokens: 128000
+    supports_long_context: true
+    cost_tier: 2 # MEDIUM
+    reasoning_score: 7
+    creativity_score: 7
+    latency_score: 6
 
   # --- DeepSeek ---
   - id: "deepseek:deepseek-chat"
@@ -55,7 +72,7 @@ models:
     is_local: false
     max_context_tokens: 64000
     supports_long_context: true
-    cost_tier: 1          # LOW
+    cost_tier: 1 # LOW
     reasoning_score: 7
     creativity_score: 6
     latency_score: 7
